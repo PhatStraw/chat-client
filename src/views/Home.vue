@@ -1,18 +1,48 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <Layout>
+      <template v-slot:default="slotProps">
+        <div class="default">
+          <h1>Welcome Back {{slotProps.curUsr.user.name}}, Lets Chat Around!</h1>
+        </div>
+      </template>
+    </Layout>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
+import Layout from "../components/LayOut";
 
 export default {
-  name: "Home",
+  name: "App",
   components: {
-    HelloWorld
+    Layout
   }
 };
 </script>
+
+<style scoped>
+.default {
+  height: 100vh;
+  width: 100%;
+  background: red;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+</style>
+
+<style>
+body {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+}
+</style>
