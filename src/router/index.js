@@ -1,6 +1,8 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
+import ChatRoom from "../views/ChatRoom.vue";
+
 
 Vue.use(VueRouter);
 
@@ -9,6 +11,11 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home
+  },
+  {
+    path: "/room/:id",
+    name: "ChatRoom",
+    component: ChatRoom
   }
 ];
 
