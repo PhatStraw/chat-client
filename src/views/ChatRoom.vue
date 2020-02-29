@@ -1,37 +1,66 @@
 <template>
   <Layout>
+    <template>
     <div id="message-id">
       <div class="messages">
         <ul>
-          <li v-for="message in messages" :key="message._id">{{message.message}}</li>
+          <li v-for="message in prevMessages" :key="message._id">{{prevMessage.message}}</li>
+        </ul>
+        <ul>
+          <li v-for="(msg, index) in messages" :key="index">{{msg.message}}</li>
         </ul>
       </div>
       <div class="message-box-container">
-        <div class="message-box">
-          <input id="m" autocomplete="off" />
-          <button>Send</button>
-        </div>
+        <form class="message-box" @submit.prevent="sendMessage">
+          <input type="text" v-model="message" class="form-control" />
+          <button type="submit" class="btn btn-success" >Send</button>
+        </form>
       </div>
     </div>
+    </template>
   </Layout>
 </template>
 <script>
-// const wait = (time) => new Promise((res) => setTimeout(() => res(), time))
+import io from "socket.io-client";
+
 export default {
   beforeRouteEnter(to, from, next) {
     // TODO: make call for server to get messages for room by id
     next(async vm => {
       vm.id = vm.$route.params.id;
       await vm.getMessages();
+      await vm.getUser();
     });
   },
+  mounted() {
+    this.socket.on("MESSAGE", data => {
+      this.messages = [...this.messages, data];
+      // you can also do this.messages.push(data)
+    });
+    
+  },
+
   data() {
     return {
       id: "",
-      messages: []
+      curUsr: {},
+      message: "",
+      prevMessages: [],
+      messages: [],
+      socket: io("http://localhost:3000/")
     };
   },
   methods: {
+    sendMessage(e) {
+      e.preventDefault();
+
+      this.socket.emit("SEND_MESSAGE", {
+        from: this.curUsr.user._id,
+        room: this.id,
+        message: this.message
+      });
+      this.message = "";
+    },
     async getMessages() {
       const resp = await window.fetch(
         `http://localhost:3000/messages/${this.id}`,
@@ -46,13 +75,27 @@ export default {
       );
       const { messages } = await resp.json();
       this.messages = messages;
+    },
+    
+    getUser: async function() {
+      var token = window.localStorage.getItem('Auth')
+      if (token) {
+      var response = await window.fetch("http://localhost:3000/user", {
+        headers: { authorization: token },
+        mode: "cors",
+        method: "GET"
+      });
+      var cur = await response.json();
+      console.log(cur)
+      this.curUsr = cur;
+      }
     }
   }
 };
 </script>
 <style scoped>
-.message-id {
-  width: 100vw;
+#message-id {
+  width: calc(100vw - 300px);
   display: flex;
   flex-direction: column;
 }
@@ -68,26 +111,25 @@ ul {
 .message-box {
   position: fixed;
   bottom: 0;
-  width: calc(100vw - 300px);
   display: flex;
   justify-content: center;
   flex-direction: row;
   border-radius: 25px;
   border: 2px solid black;
   padding: 10px;
-  width: 600px;
+  min-width: 500px;
   height: 20px;
   background: #609;
 }
 .message-box input {
   border: 0;
   padding: 10px;
-  width: 80%
+  width: 80%;
 }
 .message-box button {
   background: #609;
   border: 0;
-  padding: 10px
+  padding: 10px;
 }
 
 .message-box button:hover {
@@ -97,13 +139,13 @@ ul {
 }
 .messages {
   width: 100%;
-  list-style-type: none;
   margin: 0;
   padding: 20px;
 }
 
-.messages li {
+li {
   padding: 5px 10px;
+  list-style-type: none;
 }
 /* 
     .messages li:nth-child(odd) { 

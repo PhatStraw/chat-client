@@ -32,27 +32,11 @@ export default {
       this.curUsr = cur;
     }
   },
-
   data() {
     return {
       curUsr: {}
     };
   },
-
-  methods: {
-    async openChat(e) {
-      e.preventDefault();
-      var token = window.localStorage.getItem("Auth")
-      var response = await window.fetch("http://localhost:3000/user", {
-        headers: { authorization: token },
-        mode: "cors",
-        method: "GET"
-      });
-
-      console.log(response)
-
-    }
-  }
 };
 </script>
 
